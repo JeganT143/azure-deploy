@@ -1,0 +1,27 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  AZURE_WEBAPP_NAME: "azurePractice"  # Replace with your App Service name
+  AZURE_RESOURCE_GROUP: "Azure subscription 1" # Replace with your Azure Resource Group
+  DOCKER_IMAGE_NAME: "$(AZURE_WEBAPP_NAME):$(Build.BuildId)"
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.9'
+
+- script: |
+    docker build -t $(DOCKER_IMAGE_NAME) .
+    echo "Docker image built: $(DOCKER_IMAGE_NAME)"
+  displayName: 'Build Docker Image'
+
+- task: AzureWebAppContainer@1
+  inputs:
+    azureSubscription: 'Your Azure Subscription Name'
+    appName: '$(AZURE_WEBAPP_NAME)'
+    containers: '$(DOCKER_IMAGE_NAME)'
+  displayName: 'Deploy to Azure Web App'
